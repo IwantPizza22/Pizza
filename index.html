@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pizza</title>
+<style>
+  html, body { margin: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: "Trebuchet MS", system-ui, sans-serif; background: #fff; }
+  #stage { position: fixed; left: 50%; top: 50%; width: min(75vw, 75vh); height: min(75vw, 75vh); transform: translate(-50%, -50%); }
+  svg { width: 100%; height: 100%; overflow: visible; display: block; }
+  .slice { cursor: pointer; outline: none; transition: transform .45s cubic-bezier(.2,.9,.3,1.2), filter .45s, opacity .8s; }
+  .slice:hover, .slice:focus-visible {
+    transform: translate(calc(var(--ux) * var(--hover)), calc(var(--uy) * var(--hover))) scale(1.05);
+    filter: drop-shadow(0 14px 12px rgba(0,0,0,.55));
+  }
+  .slice.taken {
+    transition: transform 1s cubic-bezier(.5,-.2,.3,1), opacity .9s ease .15s, filter 1s;
+    transform: translate(calc(var(--ux) * var(--fly)), calc(var(--uy) * var(--fly))) rotate(14deg) scale(1.5);
+    filter: drop-shadow(0 30px 24px rgba(0,0,0,.5));
+    opacity: 0; pointer-events: none;
+  }
+  .label { fill: #fff; font-weight: 700; text-anchor: middle; dominant-baseline: central; pointer-events: none;
+           paint-order: stroke; stroke: rgba(40,10,0,.85); stroke-width: 4px; stroke-linejoin: round; letter-spacing: .3px; }
+
+  /* переключатель языка */
+  #lang { position: fixed; top: 16px; right: 18px; z-index: 30; display: flex; align-items: center; gap: 4px; font-size: 14px; color: #bbb; }
+  #lang button { border: 0; background: none; font: inherit; font-weight: 700; letter-spacing: 1px; color: #999; padding: 5px 9px; border-radius: 999px; cursor: pointer; transition: .2s; }
+  #lang button:hover { color: #3b1f0a; }
+  #lang button.on { background: #3b1f0a; color: #fff; }
+
+  /* модалка */
+  #modal { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.55); opacity: 0; pointer-events: none; transition: opacity .4s; z-index: 10; }
+  #modal.open { opacity: 1; pointer-events: auto; }
+  .card { background: #fff7e8; color: #3b1f0a; width: min(560px, 92vw); max-height: 90vh; overflow: auto; box-sizing: border-box; padding: 30px; border-radius: 18px; box-shadow: 0 24px 60px rgba(0,0,0,.5); transform: scale(.85) translateY(20px); transition: transform .4s cubic-bezier(.2,.9,.3,1.2); }
+  #modal.open .card { transform: none; }
+  .card h2 { margin: 0 0 12px; font-size: 28px; color: #b3341b; }
+  .card p { line-height: 1.55; margin: 0 0 18px; }
+  .btn { background: #c8402a; color: #fff; border: 0; padding: 10px 22px; border-radius: 999px; font-size: 16px; cursor: pointer; transition: .2s; }
+  .btn:hover { background: #a93220; }
+  .btn.ghost { background: #ecd9bb; color: #3b1f0a; }
+  .btn.ghost:hover { background: #e0c9a4; }
+  .row { display: flex; gap: 10px; justify-content: space-between; margin-top: 22px; }
+  #m-close { display: block; margin: 22px auto 0; }
+  #m-close.small { background: none; color: #9b7a5a; font-size: 14px; padding: 4px; }
+
+  /* Pizzamood */
+  .bar { height: 8px; background: #ecd9bb; border-radius: 99px; overflow: hidden; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, #f0a030, #c8402a); border-radius: 99px; transition: width .4s; }
+  .cnt { font-size: 13px; color: #9b7a5a; margin: 6px 0 14px; }
+  .q { font-size: 21px; line-height: 1.3; margin: 0 0 18px; min-height: 56px; }
+  .val { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .num { font-size: 64px; font-weight: 800; color: #c8402a; line-height: 1; min-width: 80px; text-align: center; }
+  .emo { font-size: 56px; line-height: 1; }
+  .st { text-align: center; font-weight: 700; margin: 6px 0 18px; min-height: 22px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; border-radius: 99px; outline: none; cursor: pointer;
+    background: linear-gradient(90deg, #e8553a var(--pct), #ecd9bb var(--pct)); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 5px solid #c8402a; box-shadow: 0 3px 8px rgba(0,0,0,.3); transition: transform .15s; }
+  input[type=range]:active::-webkit-slider-thumb { transform: scale(1.15); }
+  input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 5px solid #c8402a; box-shadow: 0 3px 8px rgba(0,0,0,.3); }
+  input[type=range]::-moz-range-track { background: transparent; }
+  .ticks { display: flex; justify-content: space-between; font-size: 12px; color: #9b7a5a; margin-top: 8px; }
+  .res { text-align: center; }
+  .res .big { font-size: 72px; line-height: 1; }
+  .res h2 { margin: 8px 0 4px; }
+  .res .ing { color: #8a5a2a; font-style: italic; margin-bottom: 14px; }
+  .res p { text-align: left; }
+  .meter { height: 12px; border-radius: 99px; position: relative; background: linear-gradient(90deg, #d9402a, #f0b030, #5bb85b); margin: 8px 0 6px; }
+  .meter b { position: absolute; top: -5px; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%; background: #fff; border: 4px solid #3b1f0a; box-sizing: border-box; }
+  .mt { font-size: 13px; color: #9b7a5a; text-align: left; }
+
+  /* статьи: «История» и «Интересные факты» */
+  .card.wide { width: min(800px, 90vw); max-height: 85vh; padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .card.wide #m-body { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+  .card.wide #m-close { display: none; }
+  .m-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 26px 14px; background: #fff7e8; border-bottom: 1px solid #ecd9bb; box-shadow: 0 6px 12px -10px rgba(60,30,0,.5); z-index: 1; }
+  .m-head h2 { margin: 0; font-size: clamp(22px, 4vw, 30px); }
+  .x { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: #ecd9bb; color: #3b1f0a; font-size: 18px; cursor: pointer; transition: .2s; }
+  .x:hover { background: #c8402a; color: #fff; transform: rotate(90deg); }
+  .m-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; scroll-behavior: smooth; padding: 22px 26px 30px; scrollbar-width: thin; scrollbar-color: #c8402a #ecd9bb; }
+  .m-scroll::-webkit-scrollbar { width: 10px; }
+  .m-scroll::-webkit-scrollbar-track { background: #ecd9bb; border-radius: 99px; }
+  .m-scroll::-webkit-scrollbar-thumb { background: #c8402a; border-radius: 99px; border: 2px solid #ecd9bb; }
+  .prose { max-width: 66ch; margin: 0 auto; }
+  .prose p { line-height: 1.65; margin: 0 0 16px; }
+  .prose .lead { font-size: 19px; line-height: 1.55; color: #6b3a14; }
+  .prose h3 { margin: 28px 0 8px; font-size: 21px; color: #b3341b; }
+  .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 22px auto; max-width: none; }
+  .shot { margin: 0; }
+  .shot:first-child { grid-column: 1 / -1; }
+  .ph { aspect-ratio: 4 / 3; overflow: hidden; border-radius: 14px; background: #ecd9bb; cursor: zoom-in; box-shadow: 0 6px 16px rgba(60,30,0,.2); }
+  .shot:first-child .ph { aspect-ratio: 16 / 9; }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s; }
+  .ph:hover img { transform: scale(1.07); }
+  .shot figcaption { font-size: 13px; color: #8a5a2a; margin-top: 6px; line-height: 1.4; }
+  @media (max-width: 520px) {
+    .gallery { grid-template-columns: 1fr; }
+    .m-head { padding: 16px 16px 12px; } .m-scroll { padding: 16px 16px 24px; }
+  }
+  #lightbox { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.88); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; box-sizing: border-box; opacity: 0; pointer-events: none; transition: opacity .3s; cursor: zoom-out; }
+  #lightbox.open { opacity: 1; pointer-events: auto; }
+  #lightbox img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 10px; }
+  #lightbox .cap { color: #fff; font-size: 15px; text-align: center; }
+</style>
+</head>
+<body>
+<div id="lang"><button data-l="ru">RU</button>/<button data-l="en">EN</button></div>
+<div id="stage"></div>
+
+<div id="modal" role="dialog" aria-modal="true">
+  <div class="card">
+    <div id="m-body"></div>
+    <button id="m-close" class="btn"></button>
+  </div>
+</div>
+
+<div id="lightbox"><img alt=""><div class="cap"></div></div>
+
+<script>
+/* ============ КАРТИНКИ ============ */
+const PIZZA_IMAGE_URL = 'Pizza.png';   // фото пиццы (PNG с прозрачным фоном)
+// Геометрия пиццы в файле: размер, центр и радиус в пикселях (поправь при замене фото)
+const IMG = { w: 920, h: 500, cx: 461.5, cy: 253, r: 246 };
+
+/* ============ ТИПЫ КУСКОВ И ССЫЛКИ ============ */
+// Порядок по часовой стрелке. type: 'stub' — заглушка, 'article' — длинная статья с 3 фото, 'mood' — тест Pizzamood, 'link' — внешняя ссылка.
+// Ссылки на ТГ-каналы меняй здесь:
+const ITEMS_META = [
+  { type: 'article', key: 'history' }, { type: 'stub' }, { type: 'article', key: 'facts' }, { type: 'mood' }, { type: 'stub' },
+  { type: 'link', url: 'https://t.me/iwantpizza22' },
+  { type: 'link', url: 'https://t.me/+J-yS2Ko7sDNiNTRi' },
+  { type: 'link', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+];
+
+
+/* ============ ФОТО ДЛЯ СТАТЕЙ («История» и «Интересные факты») ============ */
+// Ровно по 3 фото на раздел. Просто впиши путь к файлу (лежит рядом с index.html) или полную ссылку https://...
+// Первое фото показывается крупным, второе и третье — рядом ниже. Подписи — в translations (captions).
+const ARTICLE_PHOTOS = {
+  history: ['печка.png', 'помидоры.png', 'эмиграция.png'],
+  facts:   ['img/facts-1.jpg',   'img/facts-2.jpg',   'img/facts-3.jpg'],
+};
+
+// Эмодзи итоговых пицц (тексты — в translations)
+const PIZZA_EMOJI = { cheese: '🧀', antistress: '🛋️', hermit: '🍄', diavola: '🌶️', margherita: '🍅', pepperoni: '🍕', prosciutto: '🥬', pear: '🍐' };
+// Эмодзи для значений слайдера 0..10
+const FACES = ['💀','😫','😩','😕','😐','🙂','😊','😄','😁','🤩','😎🤙'];
+
+/* ============ ВСЕ ТЕКСТЫ (RU / EN) ============ */
+const translations = {
+  ru: {
+    docTitle: 'Пицца-меню',
+
+    // Статьи: title, lead (вступление), sections (подзаголовок h + абзац p), captions (подписи к 3 фото)
+    articles: {
+      history: {
+        title: 'История пиццы',
+        lead: 'Пицца старше, чем кажется, и гораздо демократичнее своей репутации: начиналась она как дешёвая уличная еда для тех, кому некогда сидеть за столом.',
+        sections: [
+          { h: 'Лепёшки задолго до пиццы', p: 'Плоские лепёшки с травами, маслом и сыром пекли ещё в Древнем Египте, Греции и Риме. Это была простая еда на каждый день, которую можно съесть на ходу. Томата в ней, конечно, не было: до открытия Америки в Европе о нём просто не знали.' },
+          { h: 'Неаполь и красный соус', p: 'Томаты привезли в Европу в XVI веке, и поначалу их считали подозрительной диковинкой. Зато бедные жители Неаполя быстро оценили новинку: лепёшка, томат и немного сыра стоили копейки, готовились за минуты и ели их руками прямо на улице.' },
+          { h: 'Маргарита, которая стала легендой', p: 'По известной легенде, в 1889 году неаполитанский пиццайоло испёк для королевы Маргариты пиццу цвета итальянского флага: красные томаты, белая моцарелла и зелёный базилик. Историки спорят, всё ли так и было, но название прижилось навсегда.' },
+          { h: 'Из Неаполя в весь мир', p: 'Итальянские эмигранты увезли рецепты за океан, и в начале XX века в Нью-Йорке появились первые пиццерии. После Второй мировой войны пицца разошлась по всему миру и обросла тысячей вариантов: от тонкой римской до глубокой чикагской.' },
+        ],
+        captions: ['Дровяная печь — сердце настоящей пиццерии', 'Томаты — главные герои соуса', 'Эмигранты увезли пиццу за океан'],
+      },
+      facts: {
+        title: 'Интересные факты',
+        lead: 'Пицца — это не просто еда, а целая вселенная странных рекордов, жарких споров и неожиданных совпадений.',
+        sections: [
+          { h: 'Ананас родом из Канады', p: 'Гавайскую пиццу придумали не на Гавайях: в 1962 году её приготовил в Онтарио греческий эмигрант Сэм Панопулос. А название пришло от марки консервированных ананасов, которые он использовал. С тех пор спор «можно ли ананас на пиццу» не утихает.' },
+          { h: 'Минута в огне', p: 'Настоящую неаполитанскую пиццу выпекают в дровяной печи при температуре около 430–480 °C. На всё про всё уходит примерно 60–90 секунд, а значит, прозевать момент нельзя совсем.' },
+          { h: 'Искусство под защитой ЮНЕСКО', p: 'В 2017 году искусство неаполитанских пиццайоло, то есть сам процесс замеса, растягивания теста и выпечки, внесли в список нематериального культурного наследия ЮНЕСКО. Так что вращать тесто на пальцах — почти официально высокое искусство.' },
+          { h: 'Пицца без томатов', p: 'Существует «пицца бьянка» — белая пицца без томатного соуса: с оливковым маслом, чесноком, розмарином и сыром. Она напоминает, что красный соус появился в истории пиццы не сразу.' },
+        ],
+        captions: ['Ананас: вечная причина для споров', 'Печь раскаляется выше 400 °C', 'Пиццайоло за работой'],
+      },
+    },
+    items: [
+      { title: 'История', text: 'В скором времени будет история' },
+      { title: 'Ты любишь пиццу?', text: 'Здесь будет небольшой опрос про твою любовь к пицце.' },
+      { title: 'Интересные факты', text: 'Здесь будут любопытные факты о пицце со всего мира.' },
+      { title: 'Pizzamood' },
+      { title: 'Какая ты пицца?', text: 'Здесь будет мини-тест: какая пицца подходит тебе.' },
+      { title: 'главный даун' }, { title: 'секта' }, { title: 'строго 18+' },
+    ],
+    ui: {
+      close: 'Положить кусок обратно', moodTitle: 'Pizzamood',
+      moodSub: 'Ответь на 10 вопросов — и мы подберём пиццу под твоё состояние.',
+      back: 'Назад', next: 'Дальше', finish: 'Узнать пиццу', restart: 'Пройти заново',
+      lo: '0 — на дне', mid: '5 — ровно', hi: '10 — пушка',
+      step: (a, b) => `Вопрос ${a} из ${b}`, yourMood: 'Твоё настроение', ofTen: 'из 10', why: 'Почему именно она',
+    },
+    statuses: ['1000-7','Плакать хочеца','Грустновато','Так себе','Скорее никак','Пойдет','Норм','Хорошо','Отлично','Аккуратненько','W!'],
+    questions: [
+      'Какой общий вайб у этого дня?',
+      'Устал(а)? (0 — очень, 10 — Не, всё четко)',
+      'Насколько ты спокоен(на)? (0 — НЕРВЫНЕРВЫНЕРВЫНЕРВЫ , 10 — full chill)',
+      'Дома чилить или путешествовать? (0 — диван и плед навсегда, 10 — Путешествие 100%)',
+      'Как с аппетитом? (0 — фу еда, 10 — съем пиццу в соло)',
+      'Люди (0 — Бесят все, 10 — im friendly)',
+      'Как с концентрацией? (0 — щас усну, 10 — full focus)',
+      'Как ты спал(а)? (0 — гули не спят, 10 — родился(лась) заново)',
+      'Руки ноги? (0 — всё болит, 10 — готов(а) к марафону)',
+      'Как смотришь на ближайшие дни? (0 — всё плохо, 10 — всё будет четенько)',
+    ],
+    pizzas: {
+      cheese: { name: 'Сырная реанимация', ing: 'Моцарелла, чеддер, дорблю, пармезан, щепотка орегано',
+        why: 'Сегодня ты на дне, а значит, пора вызывать скорую. Четыре сыра — это тёплое одеяло в форме пиццы: тянется, обнимает и ни о чём не спрашивает. Съешь кусок, выдохни и начни день заново.' },
+      antistress: { name: 'Тёплый плед', ing: 'Рикотта, запечённая тыква, шалфей, мёд, грецкий орех',
+        why: 'Нервы звенят, как будильник в выходной. Эта пицца мягкая, сладковатая и очень неспешная: рикотта успокаивает, мёд сглаживает углы. Положи телефон, прожуй медленно — мир подождёт.' },
+      hermit: { name: 'Лесной отшельник', ing: 'Шампиньоны, лесные грибы, трюфельный крем, фета, тимьян',
+        why: 'Социальная батарейка на нуле, а в остальном ты в порядке. Эта пицца — как уютная лесная хижина: никаких разговоров, только грибы и тишина. Заряжайся в одиночестве, мы никому не скажем.' },
+      diavola: { name: 'Дерзкая Дьявола', ing: 'Острая салями, халапеньо, чили, красный лук, моцарелла',
+        why: 'Тебя тянет на приключения так, что чемодан уже сам собрался. Держи острую пиццу под стать характеру: она не даст расслабиться и добавит огня. Только салфетки захвати.' },
+      margherita: { name: 'Маргарита-обнимашка', ing: 'Томаты, моцарелла, свежий базилик, оливковое масло',
+        why: 'День не блеск, но и не катастрофа. Классика без выкрутасов — именно то, что нужно: простая, честная и предсказуемая. Иногда лучший план — это базилик и томаты.' },
+      pepperoni: { name: 'Ровная пепперони', ing: 'Пепперони, моцарелла, томатный соус, орегано',
+        why: 'Ровно, спокойно, без драм. Пепперони — это стабильность в круглой форме: она не изменит твой день, но сделает его вкуснее. Идеальный партнёр для нормального дня.' },
+      prosciutto: { name: 'Прошутто и рукола', ing: 'Прошутто, рукола, черри, пармезан, бальзамик',
+        why: 'Ты в хорошей форме, так почему бы не добавить элегантности? Солоноватое прошутто, перчинка руколы и бальзамик — пицца для человека, у которого всё под контролем (почти).' },
+      pear: { name: 'Груша с горгонзолой', ing: 'Груша, горгонзола, моцарелла, грецкий орех, мёд',
+        why: 'Ты сегодня на вершине, поэтому и пицца должна быть королевской. Сладкая груша, дерзкая горгонзола и мёд — вкус праздника. Отметь это настроение, ты его заслужил(а).' },
+    },
+  },
+  en: {
+    docTitle: 'Pizza menu',
+
+    articles: {
+      history: {
+        title: 'History of pizza',
+        lead: 'Pizza is older than it looks and far more down-to-earth than its reputation: it began as cheap street food for people with no time to sit at a table.',
+        sections: [
+          { h: 'Flatbreads long before pizza', p: 'Flat breads topped with herbs, oil and cheese were baked in ancient Egypt, Greece and Rome. It was simple everyday food you could eat on the go. There was no tomato yet, of course: before the discovery of the Americas, Europe had never heard of it.' },
+          { h: 'Naples and the red sauce', p: 'Tomatoes reached Europe in the 16th century and were first seen as a suspicious curiosity. The poor of Naples, however, quickly embraced them: a flatbread, a tomato and a bit of cheese cost almost nothing, took minutes to make and could be eaten by hand in the street.' },
+          { h: 'The Margherita that became a legend', p: 'According to a famous legend, in 1889 a Neapolitan pizzaiolo baked a pizza for Queen Margherita in the colors of the Italian flag: red tomatoes, white mozzarella and green basil. Historians argue about how true it is, but the name stuck forever.' },
+          { h: 'From Naples to the world', p: 'Italian emigrants took the recipes overseas, and the first pizzerias opened in New York in the early 20th century. After World War II pizza spread across the globe and grew a thousand variations, from thin Roman to deep-dish Chicago.' },
+        ],
+        captions: ['A wood-fired oven is the heart of a real pizzeria', 'Tomatoes are the heroes of the sauce', 'Emigrants took pizza across the ocean'],
+      },
+      facts: {
+        title: 'Fun facts',
+        lead: 'Pizza is not just food, it is a whole universe of odd records, heated arguments and unexpected coincidences.',
+        sections: [
+          { h: 'Pineapple comes from Canada', p: 'Hawaiian pizza was not invented in Hawaii: in 1962 it was made in Ontario by a Greek immigrant named Sam Panopoulos. The name came from the brand of canned pineapple he used. The “does pineapple belong on pizza” debate has been raging ever since.' },
+          { h: 'One minute in the fire', p: 'A true Neapolitan pizza is baked in a wood-fired oven at roughly 430–480 °C. The whole thing takes about 60–90 seconds, so you simply cannot look away.' },
+          { h: 'An art protected by UNESCO', p: 'In 2017 the art of the Neapolitan pizzaiolo, meaning the kneading, stretching and baking, was added to UNESCO’s list of intangible cultural heritage. So spinning dough on your fingers is almost officially high art.' },
+          { h: 'Pizza without tomatoes', p: 'There is a “pizza bianca”: a white pizza with no tomato sauce, made with olive oil, garlic, rosemary and cheese. It is a reminder that red sauce did not show up in pizza’s story right away.' },
+        ],
+        captions: ['Pineapple: an eternal reason to argue', 'The oven heats beyond 400 °C', 'A pizzaiolo at work'],
+      },
+    },
+    items: [
+      { title: 'History', text: 'The history of pizza will live here — from ancient flatbreads to Naples and back.' },
+      { title: 'Do you love pizza?', text: 'A short poll about your love for pizza will live here.' },
+      { title: 'Fun facts', text: 'Curious pizza facts from around the world will live here.' },
+      { title: 'Pizzamood' },
+      { title: 'Which pizza are you?', text: 'A mini quiz about which pizza suits you will live here.' },
+      { title: 'I`m CEO, Bitch' }, { title: 'Fan club' }, { title: 'only 18+' },
+    ],
+    ui: {
+      close: 'Put the slice back', moodTitle: 'Pizzamood',
+      moodSub: 'Answer 10 questions and we will pick a pizza for your current state.',
+      back: 'Back', next: 'Next', finish: 'Get my pizza', restart: 'Start over',
+      lo: '0 — rock bottom', mid: '5 — so-so', hi: '10 — on fire',
+      step: (a, b) => `Question ${a} of ${b}`, yourMood: 'Your mood', ofTen: 'out of 10', why: 'Why this one',
+    },
+    statuses: ['Take The L','Very bad','Sad','Meh','60/40','Even','Not bad','Good','Great','Top','W'],
+    questions: [
+      'What is the overall vibe of today?',
+      'How much energy do you have? (0 — laptop at 1%, 10 — perpetual motion)',
+      'How calm are you? (0 — nerves are buzzing, 10 — zen master)',
+      'How much do you crave adventure? (0 — couch and blanket forever, 10 — ready to bolt anywhere)',
+      'How is your appetite? (0 — can’t even think of food, 10 — could eat a whole pizza)',
+      'How is your social battery? (0 — people, stay away, 10 — I’d befriend the whole café)',
+      'How is your focus? (0 — thoughts like browser tabs, 10 — laser focus)',
+      'How did you sleep? (0 — might as well not have, 10 — rested for five years ahead)',
+      'How does your body feel? (0 — everything creaks, 10 — ready for a marathon)',
+      'How do the next few days look? (0 — grim, 10 — gonna be amazing)',
+    ],
+    pizzas: {
+      cheese: { name: 'Cheese Intensive Care', ing: 'Mozzarella, cheddar, gorgonzola dolce, parmesan, pinch of oregano',
+        why: 'You are at rock bottom, so call the ambulance. Four cheeses are a warm blanket shaped like a pizza: stretchy, hugging and asking no questions. Eat a slice, exhale, restart the day.' },
+      antistress: { name: 'The Warm Blanket', ing: 'Ricotta, roasted pumpkin, sage, honey, walnuts',
+        why: 'Your nerves are ringing like an alarm on a day off. This pizza is soft, slightly sweet and unhurried: ricotta soothes, honey smooths the edges. Put the phone down, chew slowly — the world can wait.' },
+      hermit: { name: 'Forest Hermit', ing: 'Button mushrooms, wild mushrooms, truffle cream, feta, thyme',
+        why: 'Social battery is empty, everything else is fine. This pizza is a cozy forest cabin: no small talk, just mushrooms and silence. Recharge alone — we will not tell anyone.' },
+      diavola: { name: 'Bold Diavola', ing: 'Spicy salami, jalapeños, chili, red onion, mozzarella',
+        why: 'You crave adventure so hard your suitcase packed itself. Here is a spicy pizza to match your attitude: it will not let you relax and adds fire. Bring napkins.' },
+      margherita: { name: 'Margherita Hug', ing: 'Tomatoes, mozzarella, fresh basil, olive oil',
+        why: 'The day is not great, but not a disaster either. A no-frills classic is exactly what you need: simple, honest, predictable. Sometimes the best plan is basil and tomatoes.' },
+      pepperoni: { name: 'Steady Pepperoni', ing: 'Pepperoni, mozzarella, tomato sauce, oregano',
+        why: 'Even, calm, no drama. Pepperoni is stability in round form: it will not change your day, but it will make it tastier. The perfect partner for a normal day.' },
+      prosciutto: { name: 'Prosciutto & Arugula', ing: 'Prosciutto, arugula, cherry tomatoes, parmesan, balsamic',
+        why: 'You are in good shape, so why not add some elegance? Salty prosciutto, peppery arugula and balsamic — a pizza for someone who has it all under control (almost).' },
+      pear: { name: 'Pear & Gorgonzola', ing: 'Pear, gorgonzola, mozzarella, walnuts, honey',
+        why: 'You are on top today, so the pizza should be royal. Sweet pear, bold gorgonzola and honey taste like a celebration. Enjoy this mood, you earned it.' },
+    },
+  },
+};
+
+/* ============ ЯЗЫК ============ */
+// Определяем по языку браузера: русский — RU, иначе EN
+let lang = (navigator.language || 'en').toLowerCase().startsWith('ru') ? 'ru' : 'en';
+try { lang = localStorage.getItem('lang') || lang; } catch (e) {}
+const t = () => translations[lang];
+
+/* ============ ПИЦЦА И КУСКИ (SVG) ============ */
+const NS = 'http://www.w3.org/2000/svg';
+const R = IMG.r, N = ITEMS_META.length, STEP = 360 / N;
+const el = (n, a = {}, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); p && p.appendChild(e); return e; };
+const pt = (deg, rad) => [rad * Math.cos(deg * Math.PI / 180), rad * Math.sin(deg * Math.PI / 180)];
+
+const svg = el('svg', { viewBox: `${-R} ${-R} ${2 * R} ${2 * R}` }, document.getElementById('stage'));
+const defs = el('defs', {}, svg);
+const RR = R * 1.02;
+const labels = [], slices = [];
+
+ITEMS_META.forEach((meta, i) => {
+  const a1 = -90 + i * STEP, a2 = a1 + STEP, mid = (a1 + a2) / 2;
+  const [x1, y1] = pt(a1, RR), [x2, y2] = pt(a2, RR);
+  const d = `M0 0 L${x1} ${y1} A${RR} ${RR} 0 0 1 ${x2} ${y2} Z`;
+  const clip = el('clipPath', { id: 'clip' + i }, defs);
+  el('path', { d }, clip);
+
+  const g = el('g', { class: 'slice', tabindex: 0, role: 'button' }, svg);
+  const [ux, uy] = pt(mid, 1);
+  g.style.setProperty('--ux', ux); g.style.setProperty('--uy', uy);
+  g.style.setProperty('--hover', R * 0.09 + 'px');   // выдвижение при наведении
+  g.style.setProperty('--fly', R * 1.5 + 'px');       // полёт при клике
+  g.style.transformOrigin = `${R}px ${R}px`;
+
+  const inner = el('g', { 'clip-path': `url(#clip${i})` }, g);
+  el('image', { href: PIZZA_IMAGE_URL, x: -IMG.cx, y: -IMG.cy, width: IMG.w, height: IMG.h }, inner);
+  el('path', { d, fill: 'transparent' }, inner);
+
+  const flip = Math.cos(mid * Math.PI / 180) < 0;
+  const [tx, ty] = pt(mid, R * 0.6);
+  labels.push(el('text', { class: 'label', transform: `translate(${tx} ${ty}) rotate(${flip ? mid + 180 : mid})`, 'font-size': R * 0.062 }, g));
+  slices.push(g);
+
+  g.addEventListener('click', () => takeSlice(i));
+  g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); takeSlice(i); } });
+});
+
+/* ============ МОДАЛКА ============ */
+const modal = document.getElementById('modal');
+const body = document.getElementById('m-body');
+let openIdx = null, current = null;
+
+function takeSlice(i) {
+  if (current !== null) return;
+  current = i;
+  slices[i].classList.add('taken');
+  setTimeout(() => {
+    const meta = ITEMS_META[i];
+    if (meta.type === 'link') {                 // внешняя ссылка: открываем и возвращаем кусок
+      window.open(meta.url, '_blank', 'noopener');
+      setTimeout(giveBack, 600);
+    } else {
+      openIdx = i;
+      resetMood();
+      body.innerHTML = '';
+      renderModal();
+      modal.classList.add('open');
+    }
+  }, 750);
+}
+function giveBack() {
+  modal.classList.remove('open');
+  if (current !== null) slices[current].classList.remove('taken');
+  current = null; openIdx = null;
+}
+document.getElementById('m-close').addEventListener('click', giveBack);
+modal.addEventListener('click', e => { if (e.target === modal) giveBack(); });
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (lightbox.classList.contains('open')) closeLightbox(); else giveBack();   // сначала закрываем фото на весь экран
+});
+
+function renderModal() {
+  if (openIdx === null) return;
+  const meta = ITEMS_META[openIdx], it = t().items[openIdx];
+  document.getElementById('m-close').textContent = t().ui.close;
+  document.getElementById('m-close').className = meta.type === 'mood' ? 'btn small' : 'btn';
+  const isArticle = meta.type === 'article';
+  document.querySelector('.card').classList.toggle('wide', isArticle);
+  const oldScroll = body.querySelector('.m-scroll');
+  const keepTop = oldScroll ? oldScroll.scrollTop : 0;      // сохраняем прокрутку при смене языка
+  if (meta.type === 'mood') renderMood();
+  else if (isArticle) {
+    renderArticle(meta.key);
+    body.querySelector('.m-scroll').scrollTo({ top: keepTop, behavior: 'instant' });
+  }
+  else body.innerHTML = `<h2>${it.title}</h2><p>${it.text}</p>`;
+}
+
+/* ============ СТАТЬИ + LIGHTBOX ============ */
+const lightbox = document.getElementById('lightbox');
+function closeLightbox() { lightbox.classList.remove('open'); }
+lightbox.addEventListener('click', closeLightbox);
+
+function renderArticle(key) {
+  const a = t().articles[key], photos = ARTICLE_PHOTOS[key];
+  const figs = photos.map((src, i) =>
+    `<figure class="shot"><div class="ph" data-i="${i}"><img src="${src}" alt="${a.captions[i]}" loading="lazy"></div><figcaption>${a.captions[i]}</figcaption></figure>`).join('');
+  const secs = a.sections.map(s => `<h3>${s.h}</h3><p>${s.p}</p>`).join('');
+  body.innerHTML = `
+    <div class="m-head"><h2>${a.title}</h2><button class="x" id="m-x" aria-label="${t().ui.close}" title="${t().ui.close}">✕</button></div>
+    <div class="m-scroll"><div class="prose">
+      <p class="lead">${a.lead}</p>
+      <div class="gallery">${figs}</div>
+      ${secs}
+    </div></div>`;
+  document.getElementById('m-x').onclick = giveBack;
+  body.querySelectorAll('.ph').forEach(box => box.addEventListener('click', () => {
+    const i = +box.dataset.i;
+    lightbox.querySelector('img').src = photos[i];
+    lightbox.querySelector('.cap').textContent = a.captions[i];
+    lightbox.classList.add('open');
+  }));
+}
+
+/* ============ PIZZAMOOD ============ */
+let mood = {};
+function resetMood() { mood = { step: 0, answers: [], value: 5 }; }
+resetMood();
+const QN = 10;
+
+// Умный подбор: учитываем средний балл и отдельные триггеры
+function pickPizza(a) {
+  const avg = a.reduce((s, v) => s + v, 0) / a.length;
+  const calm = a[2], adventure = a[3], social = a[5];
+  if (avg <= 2.5) return 'cheese';                       // всё совсем плохо
+  if (calm <= 1) return 'antistress';                    // стресс зашкаливает — приоритет
+  if (social <= 1 && avg >= 4) return 'hermit';          // нет сил на людей
+  if (adventure >= 9 && avg >= 4.5) return 'diavola';    // жажда приключений
+  if (avg < 4.5) return 'margherita';
+  if (avg < 6.5) return 'pepperoni';
+  if (avg < 8.5) return 'prosciutto';
+  return 'pear';
+}
+
+function renderMood() {
+  const u = t().ui;
+  if (mood.step >= QN) return renderResult();
+  const s = mood.step, v = mood.value;
+  body.innerHTML = `
+    <h2>${u.moodTitle}</h2>
+    <div class="bar"><i style="width:${s / QN * 100}%"></i></div>
+    <div class="cnt">${u.step(s + 1, QN)}</div>
+    <h3 class="q">${t().questions[s]}</h3>
+    <div class="val"><span class="num" id="num">${v}</span><span class="emo" id="emo">${FACES[v]}</span></div>
+    <div class="st" id="st">${t().statuses[v]}</div>
+    <input type="range" id="rng" min="0" max="10" step="1" value="${v}" style="--pct:${v * 10}%">
+    <div class="ticks"><span>${u.lo}</span><span>${u.mid}</span><span>${u.hi}</span></div>
+    <div class="row">
+      <button class="btn ghost" id="back" ${s === 0 ? 'style="visibility:hidden"' : ''}>${u.back}</button>
+      <button class="btn" id="next">${s === QN - 1 ? u.finish : u.next}</button>
+    </div>`;
+  const rng = document.getElementById('rng');
+  rng.addEventListener('input', () => {
+    const x = +rng.value; mood.value = x;
+    rng.style.setProperty('--pct', x * 10 + '%');
+    document.getElementById('num').textContent = x;
+    document.getElementById('emo').textContent = FACES[x];
+    document.getElementById('st').textContent = t().statuses[x];
+  });
+  document.getElementById('next').onclick = () => { mood.answers[s] = mood.value; mood.step++; mood.value = mood.answers[mood.step] ?? 5; renderMood(); };
+  document.getElementById('back').onclick = () => { mood.step--; mood.value = mood.answers[mood.step] ?? 5; renderMood(); };
+}
+
+function renderResult() {
+  const u = t().ui, key = pickPizza(mood.answers), p = t().pizzas[key];
+  const avg = mood.answers.reduce((s, v) => s + v, 0) / QN;
+  body.innerHTML = `
+    <div class="res">
+      <div class="big">${PIZZA_EMOJI[key]}</div>
+      <h2>${p.name}</h2>
+      <div class="ing">${p.ing}</div>
+      <p>${p.why}</p>
+      <div class="mt">${u.yourMood}: <b>${avg.toFixed(1)}</b> ${u.ofTen}</div>
+      <div class="meter"><b style="left:${avg * 10}%"></b></div>
+      <button class="btn" id="again" style="margin-top:14px">${u.restart}</button>
+    </div>`;
+  document.getElementById('again').onclick = () => { resetMood(); renderMood(); };
+}
+
+/* ============ ПРИМЕНЕНИЕ ЯЗЫКА ============ */
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.title = t().docTitle;
+  labels.forEach((tx, i) => { tx.textContent = t().items[i].title; slices[i].setAttribute('aria-label', t().items[i].title); });
+  document.querySelectorAll('#lang button').forEach(b => b.classList.toggle('on', b.dataset.l === lang));
+  renderModal();   // если окно открыто — перерисуем на новом языке (прогресс теста сохраняется)
+}
+document.querySelectorAll('#lang button').forEach(b => b.addEventListener('click', () => {
+  lang = b.dataset.l;
+  try { localStorage.setItem('lang', lang); } catch (e) {}
+  applyLang();
+}));
+applyLang();
+</script>
+</body>
+</html>
