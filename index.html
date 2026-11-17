@@ -612,28 +612,28 @@ applyLang();
    ===================================================================== */
 const PIZZA_DATABASE = [
   // ---------- ОБЫЧНЫЕ (синие) ----------
-  {id:'margarita', name:'Маргарита', rarity:'common', image:'images/pizzas/margarita.png', value:100, description:'Классика без понтов. Ты надёжный, спокойный и всегда приходишь вовремя. Тебя любят все, даже те, кто «не любит томаты».'},
-  {id:'pepperoni', name:'Пепперони', rarity:'common', image:'images/pizzas/pepperoni.png', value:150, description:'Душа компании. Остренький характер, но в меру. Без тебя вечеринка — просто сборище людей.'},
-  {id:'hawaiian', name:'Гавайская', rarity:'common', image:'images/pizzas/hawaiian.png', value:130, description:'Ананас на пицце? Ты не боишься споров и смело ломаешь стереотипы. Тебя либо обожают, либо яростно спорят с тобой.'},
-  {id:'four-cheese', name:'Четыре сыра', rarity:'common', image:'images/pizzas/four-cheese.png', value:200, description:'Ты — комфорт и уют. Мягкий, тянущийся, слегка тяжёлый на подъём. Идеален для вечера под пледом.'},
-  {id:'ham-mushroom', name:'Ветчина и грибы', rarity:'common', image:'images/pizzas/ham-mushroom.png', value:170, description:'Практичный и основательный. Ты тот, кто знает, где лежат документы, и всегда носит с собой зарядку.'},
-  {id:'veggie', name:'Вегетарианская', rarity:'common', image:'images/pizzas/veggie.png', value:120, description:'Здоровый образ жизни — твой конёк. Ты напоминаешь друзьям про воду и режим сна, и они тебя за это терпят.'},
-  {id:'chicken-ranch', name:'Цыплёнок Ранч', rarity:'common', image:'images/pizzas/chicken-ranch.png', value:220, description:'Мягкий снаружи, с сюрпризом внутри. Ты умеешь удивить, оставаясь при этом душкой.'},
-  {id:'mushroom', name:'Грибная', rarity:'common', image:'images/pizzas/mushroom.png', value:140, description:'Тихий мечтатель с глубоким внутренним миром. Любишь дождь, книги и одиночные прогулки.'},
-  {id:'seafood-lite', name:'Тунец и лук', rarity:'common', image:'images/pizzas/tuna-onion.png', value:190, description:'Необычный выбор — необычный ты. Нестандартные решения твоя фишка, а запах уверенности — твой парфюм.'},
-  {id:'cheeseburger', name:'Чизбургер-пицца', rarity:'common', image:'images/pizzas/cheeseburger.png', value:250, description:'Не можешь выбрать между двумя любимыми вещами — и берёшь обе. Жизнь слишком коротка для компромиссов.'},
+  {id:'margarita', name:'Маргарита', rarity:'common', image:'маргарита.png', value:100, description:'Классика без понтов. Ты надёжный, спокойный и всегда приходишь вовремя. Тебя любят все, даже те, кто «не любит томаты».'},
+  {id:'pepperoni', name:'Пепперони', rarity:'common', image:'пепа.png', value:150, description:'Душа компании. Остренький характер, но в меру. Без тебя вечеринка — просто сборище людей.'},
+  {id:'hawaiian', name:'Гавайская', rarity:'common', image:'гавайка.png', value:130, description:'Ананас на пицце? Ты не боишься споров и смело ломаешь стереотипы. Тебя либо обожают, либо яростно спорят с тобой.'},
+  {id:'four-cheese', name:'Четыре сыра', rarity:'common', image:'4 сыра.png', value:200, description:'Ты — комфорт и уют. Мягкий, тянущийся, слегка тяжёлый на подъём. Идеален для вечера под пледом.'},
+  {id:'ham-mushroom', name:'Ветчина и грибы', rarity:'common', image:'ветчинасыр.png', value:170, description:'Практичный и основательный. Ты тот, кто знает, где лежат документы, и всегда носит с собой зарядку.'},
+  {id:'veggie', name:'Вегетарианская', rarity:'common', image:'вега.png', value:120, description:'Здоровый образ жизни — твой конёк. Ты напоминаешь друзьям про воду и режим сна, и они тебя за это терпят.'},
+  {id:'chicken-ranch', name:'Цыплёнок Ранч', rarity:'common', image:'цыпленокранч.png', value:220, description:'Мягкий снаружи, с сюрпризом внутри. Ты умеешь удивить, оставаясь при этом душкой.'},
+  {id:'mushroom', name:'Грибная', rarity:'common', image:'грибы.png', value:140, description:'Тихий мечтатель с глубоким внутренним миром. Любишь дождь, книги и одиночные прогулки.'},
+  {id:'seafood-lite', name:'Тунец и лук', rarity:'common', image:'тунец.png', value:190, description:'Необычный выбор — необычный ты. Нестандартные решения твоя фишка, а запах уверенности — твой парфюм.'},
+  {id:'cheeseburger', name:'Чизбургер-пицца', rarity:'common', image:'чизбургер.png', value:250, description:'Не можешь выбрать между двумя любимыми вещами — и берёшь обе. Жизнь слишком коротка для компромиссов.'},
   // ---------- РЕДКИЕ (фиолетовые) ----------
-  {id:'pear-gorgonzola', name:'Груша и Горгонзола', rarity:'rare', image:'images/pizzas/pear-gorgonzola.png', value:700, description:'Утончённый эстет. Ты разбираешься в вине, джазе и умеешь красиво молчать. Не для всех — и ты это знаешь.'},
-  {id:'meat-boom', name:'Мясной бум', rarity:'rare', image:'images/pizzas/meat-boom.png', value:800, description:'Ты — стихия. Громкий, щедрый, всегда голодный до жизни. Рядом с тобой никто не уходит голодным.'},
-  {id:'diavola', name:'Дьябола', rarity:'rare', image:'images/pizzas/diavola.png', value:900, description:'Огонь внутри и снаружи. Ты не терпишь скуку и любишь рисковать. Осторожно: можешь обжечь.'},
-  {id:'bbq', name:'Барбекю', rarity:'rare', image:'images/pizzas/bbq.png', value:850, description:'Дымный, душевный, с характером. Ты любишь компанию, огонь и истории «а вот однажды на даче».'},
-  {id:'seafood', name:'С морепродуктами', rarity:'rare', image:'images/pizzas/seafood.png', value:1100, description:'Свободолюбивый путешественник. Море — твоя стихия, а чемодан всегда наполовину собран.'},
-  {id:'truffle', name:'Трюфельная', rarity:'rare', image:'images/pizzas/truffle.png', value:1300, description:'Редкий и дорогой вкус. Ты умеешь ценить моменты и не размениваешься на мелочи.'},
-  {id:'prosciutto-arugula', name:'Прошутто и руккола', rarity:'rare', image:'images/pizzas/prosciutto-arugula.png', value:1000, description:'Лёгкий, стильный, с хрустящим чувством юмора. На всех фото ты выглядишь так, будто так и задумано.'},
+  {id:'pear-gorgonzola', name:'Груша и Горгонзола', rarity:'rare', image:'груша.png', value:700, description:'Утончённый эстет. Ты разбираешься в вине, джазе и умеешь красиво молчать. Не для всех — и ты это знаешь.'},
+  {id:'meat-boom', name:'Мясной бум', rarity:'rare', image:'мяснойбум.png', value:800, description:'Ты — стихия. Громкий, щедрый, всегда голодный до жизни. Рядом с тобой никто не уходит голодным.'},
+  {id:'diavola', name:'Дьябола', rarity:'rare', image:'диабло.png', value:900, description:'Огонь внутри и снаружи. Ты не терпишь скуку и любишь рисковать. Осторожно: можешь обжечь.'},
+  {id:'bbq', name:'Барбекю', rarity:'rare', image:'барбек.png', value:850, description:'Дымный, душевный, с характером. Ты любишь компанию, огонь и истории «а вот однажды на даче».'},
+  {id:'seafood', name:'С морепродуктами', rarity:'rare', image:'море.png', value:1100, description:'Свободолюбивый путешественник. Море — твоя стихия, а чемодан всегда наполовину собран.'},
+  {id:'truffle', name:'Трюфельная', rarity:'rare', image:'трюф.png', value:1300, description:'Редкий и дорогой вкус. Ты умеешь ценить моменты и не размениваешься на мелочи.'},
+  {id:'prosciutto-arugula', name:'Прошутто и руккола', rarity:'rare', image:'рукала.png', value:1000, description:'Лёгкий, стильный, с хрустящим чувством юмора. На всех фото ты выглядишь так, будто так и задумано.'},
   // ---------- УЛЬТРАРЕДКИЕ (золотые) ----------
-  {id:'caviar-gold', name:'С чёрной икрой и сусальным золотом', rarity:'ultra', image:'images/pizzas/caviar-gold.png', value:3000, description:'Ты — легенда. Блестишь даже в темноте, а твой чек лучше не показывать. Скромность? Не, не слышал.'},
-  {id:'nutella-marshmallow', name:'Сладкая с Нутеллой и маршмеллоу', rarity:'ultra', image:'images/pizzas/nutella-marshmallow.png', value:2500, description:'Вечный ребёнок с гениальным чувством вкуса. Пока взрослые спорят о диете, ты уже счастлив.'},
-  {id:'chef-secret', name:'Секретная пицца от шефа', rarity:'ultra', image:'images/pizzas/chef-secret.png', value:5000, description:'Никто не знает, что внутри, — и в этом вся магия. Загадка, миф и лучший выбор вечера в одном лице.'}
+  {id:'caviar-gold', name:'С чёрной икрой и сусальным золотом', rarity:'ultra', image:'икра.png', value:3000, description:'Ты — легенда. Блестишь даже в темноте, а твой чек лучше не показывать. Скромность? Не, не слышал.'},
+  {id:'nutella-marshmallow', name:'Сладкая с Нутеллой и маршмеллоу', rarity:'ultra', image:'марш.png', value:2500, description:'Вечный ребёнок с гениальным чувством вкуса. Пока взрослые спорят о диете, ты уже счастлив.'},
+  {id:'chef-secret', name:'Секретная пицца от шефа', rarity:'ultra', image:'шеф.png', value:5000, description:'Никто не знает, что внутри, — и в этом вся магия. Загадка, миф и лучший выбор вечера в одном лице.'}
 ];
 const PZ_RARITY = {
   common:{name:'Обычная', color:'#3b82f6', weight:70},
