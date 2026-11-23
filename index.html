@@ -681,10 +681,12 @@ function open(){ if(busy)return; busy=true;$('#pz-go').disabled=true;
  for(let i=0;i<N;i++)l.push(wpick());
  if(Math.random()<.6){l[WI-3]=ultras[Math.random()*3|0];l[WI+2]=ultras[Math.random()*3|0]}
  l[WI]=win; strip.innerHTML=l.map(p=>card(p)).join('');
- const vw=strip.parentElement.clientWidth, jit=(Math.random()-.5)*110;
- const end=-(WI*CW+65-vw/2+jit), dur=7000, t0=performance.now(); let last=0; strip.style.transform='translateX(0)';
+ // размеры карточки берём из реальной вёрстки (на телефоне карточка уже, чем на ПК)
+ const c0=strip.children[0], c1=strip.children[1], step=c1.offsetLeft-c0.offsetLeft, cw=c0.offsetWidth;
+ const vw=strip.parentElement.clientWidth, jit=(Math.random()-.5)*cw*.8;
+ const end=-(WI*step+cw/2-vw/2+jit), dur=7000, t0=performance.now(); let last=0; strip.style.transform='translateX(0)';
  (function f(now){const t=Math.min((now-t0)/dur,1),x=end*ease(t);strip.style.transform=`translateX(${x}px)`;
-  const k=Math.floor(-x/CW); if(k!==last){last=k;tick()}
+  const k=Math.floor(-x/step); if(k!==last){last=k;tick()}
   if(t<1)requestAnimationFrame(f);else{inv.push({uid:uid(),id:win.id});save();renderAll();winSnd();popup(win,'Тебе выпала');busy=false;$('#pz-go').disabled=false}})(t0);
 }
 $('#pz-go').onclick=open;
