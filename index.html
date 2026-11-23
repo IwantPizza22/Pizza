@@ -564,6 +564,9 @@ applyLang();
 .pz-card img{width:150px;height:150px;object-fit:contain}
 .pz-card h3{margin:6px 0;font-size:22px}.pz-card p{color:#bbb;line-height:1.5;font-size:14px;margin:0 0 16px}
 .pz-rar{font-size:12px;font-weight:800;text-transform:uppercase;color:var(--c)}
+.pz-sec{cursor:pointer;border-color:var(--c)}
+.pz-sec.ready{animation:pzsec 1.4s ease-in-out infinite}
+@keyframes pzsec{0%,100%{box-shadow:0 0 6px var(--c)}50%{box-shadow:0 0 26px 4px var(--c)}}
 @media(max-width:760px){.pz-up{grid-template-columns:1fr 1fr}.pz-wheel-w{grid-column:1/-1;order:-1}.pz-slot{height:190px}.pz-slot img{width:76px;height:76px}.pz-two{grid-template-columns:1fr}.pz-it{width:112px}}
 </style>
 
@@ -613,37 +616,44 @@ applyLang();
 const PIZZA_DATABASE = [
   // ---------- ОБЫЧНЫЕ (синие) ----------
   {id:'margarita', name:'Маргарита', rarity:'common', image:'маргарита.png', value:100, description:'Классика без понтов. Ты надёжный, спокойный и всегда приходишь вовремя. Тебя любят все, даже те, кто «не любит томаты».'},
-  {id:'pepperoni', name:'Пепперони', rarity:'common', image:'пепа.png', value:150, description:'Душа компании. Остренький характер, но в меру. Без тебя вечеринка — просто сборище людей.'},
-  {id:'hawaiian', name:'Гавайская', rarity:'common', image:'гавайка.png', value:130, description:'Ананас на пицце? Ты не боишься споров и смело ломаешь стереотипы. Тебя либо обожают, либо яростно спорят с тобой.'},
-  {id:'four-cheese', name:'Четыре сыра', rarity:'common', image:'4 сыра.png', value:200, description:'Ты — комфорт и уют. Мягкий, тянущийся, слегка тяжёлый на подъём. Идеален для вечера под пледом.'},
-  {id:'ham-mushroom', name:'Ветчина и грибы', rarity:'common', image:'ветчинасыр.png', value:170, description:'Практичный и основательный. Ты тот, кто знает, где лежат документы, и всегда носит с собой зарядку.'},
+  {id:'pepperoni', name:'Пепперони', rarity:'common', image:'пепа.png', value:200, description:'Душа компании. Остренький характер, но в меру. Без тебя вечеринка — просто сборище людей.'},
+  {id:'hawaiian', name:'Гавайская', rarity:'common', image:'гавайка.png', value:145, description:'Ананас на пицце? Ты не боишься споров и смело ломаешь стереотипы. Тебя либо обожают, либо яростно спорят с тобой.'},
+  {id:'four-cheese', name:'Четыре сыра', rarity:'common', image:'4 сыра.png', value:350, description:'Ты — комфорт и уют. Мягкий, тянущийся, слегка тяжёлый на подъём. Идеален для вечера под пледом.'},
+  {id:'ham-mushroom', name:'Ветчина и грибы', rarity:'common', image:'ветчинасыр.png', value:240, description:'Практичный и основательный. Ты тот, кто знает, где лежат документы, и всегда носит с собой зарядку.'},
   {id:'veggie', name:'Вегетарианская', rarity:'common', image:'вега.png', value:120, description:'Здоровый образ жизни — твой конёк. Ты напоминаешь друзьям про воду и режим сна, и они тебя за это терпят.'},
-  {id:'chicken-ranch', name:'Цыплёнок Ранч', rarity:'common', image:'цыпленокранч.png', value:220, description:'Мягкий снаружи, с сюрпризом внутри. Ты умеешь удивить, оставаясь при этом душкой.'},
-  {id:'mushroom', name:'Грибная', rarity:'common', image:'грибы.png', value:140, description:'Тихий мечтатель с глубоким внутренним миром. Любишь дождь, книги и одиночные прогулки.'},
-  {id:'seafood-lite', name:'Тунец и лук', rarity:'common', image:'тунец.png', value:190, description:'Необычный выбор — необычный ты. Нестандартные решения твоя фишка, а запах уверенности — твой парфюм.'},
-  {id:'cheeseburger', name:'Чизбургер-пицца', rarity:'common', image:'чизбургер.png', value:250, description:'Не можешь выбрать между двумя любимыми вещами — и берёшь обе. Жизнь слишком коротка для компромиссов.'},
+  {id:'chicken-ranch', name:'Цыплёнок Ранч', rarity:'common', image:'цыпленокранч.png', value:420, description:'Мягкий снаружи, с сюрпризом внутри. Ты умеешь удивить, оставаясь при этом душкой.'},
+  {id:'mushroom', name:'Грибная', rarity:'common', image:'грибы.png', value:170, description:'Тихий мечтатель с глубоким внутренним миром. Любишь дождь, книги и одиночные прогулки.'},
+  {id:'seafood-lite', name:'Тунец и лук', rarity:'common', image:'тунец.png', value:290, description:'Необычный выбор — необычный ты. Нестандартные решения твоя фишка, а запах уверенности — твой парфюм.'},
+  {id:'cheeseburger', name:'Чизбургер-пицца', rarity:'common', image:'чизбургер.png', value:500, description:'Не можешь выбрать между двумя любимыми вещами — и берёшь обе. Жизнь слишком коротка для компромиссов.'},
   // ---------- РЕДКИЕ (фиолетовые) ----------
-  {id:'pear-gorgonzola', name:'Груша и Горгонзола', rarity:'rare', image:'груша.png', value:700, description:'Утончённый эстет. Ты разбираешься в вине, джазе и умеешь красиво молчать. Не для всех — и ты это знаешь.'},
-  {id:'meat-boom', name:'Мясной бум', rarity:'rare', image:'мяснойбум.png', value:800, description:'Ты — стихия. Громкий, щедрый, всегда голодный до жизни. Рядом с тобой никто не уходит голодным.'},
-  {id:'diavola', name:'Дьябола', rarity:'rare', image:'диабло.png', value:900, description:'Огонь внутри и снаружи. Ты не терпишь скуку и любишь рисковать. Осторожно: можешь обжечь.'},
+  {id:'pear-gorgonzola', name:'Груша и Горгонзола', rarity:'rare', image:'груша.png', value:600, description:'Утончённый эстет. Ты разбираешься в вине, джазе и умеешь красиво молчать. Не для всех — и ты это знаешь.'},
+  {id:'meat-boom', name:'Мясной бум', rarity:'rare', image:'мяснойбум.png', value:710, description:'Ты — стихия. Громкий, щедрый, всегда голодный до жизни. Рядом с тобой никто не уходит голодным.'},
+  {id:'diavola', name:'Дьябола', rarity:'rare', image:'диабло.png', value:1020, description:'Огонь внутри и снаружи. Ты не терпишь скуку и любишь рисковать. Осторожно: можешь обжечь.'},
   {id:'bbq', name:'Барбекю', rarity:'rare', image:'барбек.png', value:850, description:'Дымный, душевный, с характером. Ты любишь компанию, огонь и истории «а вот однажды на даче».'},
-  {id:'seafood', name:'С морепродуктами', rarity:'rare', image:'море.png', value:1100, description:'Свободолюбивый путешественник. Море — твоя стихия, а чемодан всегда наполовину собран.'},
-  {id:'truffle', name:'Трюфельная', rarity:'rare', image:'трюф.png', value:1300, description:'Редкий и дорогой вкус. Ты умеешь ценить моменты и не размениваешься на мелочи.'},
-  {id:'prosciutto-arugula', name:'Прошутто и руккола', rarity:'rare', image:'рукала.png', value:1000, description:'Лёгкий, стильный, с хрустящим чувством юмора. На всех фото ты выглядишь так, будто так и задумано.'},
+  {id:'seafood', name:'С морепродуктами', rarity:'rare', image:'море.png', value:1450, description:'Свободолюбивый путешественник. Море — твоя стихия, а чемодан всегда наполовину собран.'},
+  {id:'truffle', name:'Трюфельная', rarity:'rare', image:'трюф.png', value:1750, description:'Редкий и дорогой вкус. Ты умеешь ценить моменты и не размениваешься на мелочи.'},
+  {id:'prosciutto-arugula', name:'Прошутто и руккола', rarity:'rare', image:'рукала.png', value:1220, description:'Лёгкий, стильный, с хрустящим чувством юмора. На всех фото ты выглядишь так, будто так и задумано.'},
   // ---------- УЛЬТРАРЕДКИЕ (золотые) ----------
-  {id:'caviar-gold', name:'С чёрной икрой и сусальным золотом', rarity:'ultra', image:'икра.png', value:3000, description:'Ты — легенда. Блестишь даже в темноте, а твой чек лучше не показывать. Скромность? Не, не слышал.'},
-  {id:'nutella-marshmallow', name:'Сладкая с Нутеллой и маршмеллоу', rarity:'ultra', image:'марш.png', value:2500, description:'Вечный ребёнок с гениальным чувством вкуса. Пока взрослые спорят о диете, ты уже счастлив.'},
-  {id:'chef-secret', name:'Секретная пицца от шефа', rarity:'ultra', image:'шеф.png', value:5000, description:'Никто не знает, что внутри, — и в этом вся магия. Загадка, миф и лучший выбор вечера в одном лице.'}
+  {id:'caviar-gold', name:'С чёрной икрой и сусальным золотом', rarity:'ultra', image:'икра.png', value:2500, description:'Ты — легенда. Блестишь даже в темноте, а твой чек лучше не показывать. Скромность? Не, не слышал.'},
+  {id:'nutella-marshmallow', name:'Сладкая с Нутеллой и маршмеллоу', rarity:'ultra', image:'марш.png', value:2100, description:'Вечный ребёнок с гениальным чувством вкуса. Пока взрослые спорят о диете, ты уже счастлив.'},
+  {id:'chef-secret', name:'Секретная пицца от шефа', rarity:'ultra', image:'шеф.png', value:3000, description:'Никто не знает, что внутри, — и в этом вся магия. Загадка, миф и лучший выбор вечера в одном лице.'},
+  // ---------- СЕКРЕТНАЯ (розовая, знак вопроса) ----------
+  // Выпадает в рулетке как обычная карточка, но открывается только через SECRET_WAIT_MS.
+  // Что внутри — решается в момент выпадения: случайная пицца из всех остальных. Картинка: секрет.png
+  {id:'secret', name:'Секретная пицца', rarity:'secret', image:'секрет.png', value:0, description:'Закрытая коробка со знаком вопроса. Когда таймер дойдёт до нуля, внутри окажется случайная пицца: от самой простой до самой легендарной.'}
 ];
 const PZ_RARITY = {
-  common:{name:'Обычная', color:'#3b82f6', weight:70},
+  common:{name:'Обычная', color:'#3b82f6', weight:67},
   rare:{name:'Редкая', color:'#a855f7', weight:25},
-  ultra:{name:'Ультраредкая', color:'#eab308', weight:5}
+  ultra:{name:'Ультраредкая', color:'#eab308', weight:5},
+  secret:{name:'Секретная', color:'#ff3d81', weight:3}   // шанс выпадения секретной пиццы
 };
+const SECRET_WAIT_MS = 60*60*1000;   // сколько ждать до открытия секретной пиццы (1 час). Для проверки поставь 10*1000 (10 секунд)
 (function(){
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const FB='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50 92 L10 22 Q50 2 90 22Z" fill="#f2b44a" stroke="#c77d1a" stroke-width="3" stroke-linejoin="round"/><path d="M10 22 Q50 2 90 22" fill="none" stroke="#a8561a" stroke-width="7" stroke-linecap="round"/><circle cx="38" cy="32" r="6" fill="#c0392b"/><circle cx="60" cy="34" r="6" fill="#c0392b"/><circle cx="49" cy="56" r="6" fill="#c0392b"/><circle cx="48" cy="74" r="3.5" fill="#c0392b"/></svg>');
-const img=p=>`<img src="${p.image}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${FB}'">`;
+const FBQ='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#1e1e24" stroke="#ff3d81" stroke-width="4"/><text x="50" y="68" font-size="58" font-weight="800" text-anchor="middle" fill="#ff3d81" font-family="Arial,sans-serif">?</text></svg>');
+const img=p=>`<img src="${p.image}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${p.id==='secret'?FBQ:FB}'">`;
 const byId=id=>PIZZA_DATABASE.find(p=>p.id===id);
 const col=p=>PZ_RARITY[p.rarity].color;
 let inv=[]; try{inv=JSON.parse(localStorage.getItem('pz_inv')||'[]').filter(x=>byId(x.id))}catch(e){}
@@ -666,14 +676,33 @@ $('#pz-x').onclick=pzClose;
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#pz-ov').classList.contains('open'))pzClose()});
 $$('.pz-tab').forEach(b=>b.onclick=()=>{if(busy)return;$$('.pz-tab').forEach(x=>x.classList.toggle('on',x===b));
  $('#pz-case').style.display=b.dataset.t==='case'?'':'none';$('#pz-up').style.display=b.dataset.t==='up'?'':'none';renderAll()});
-const card=(p,extra='')=>`<div class="pz-it ${extra}" style="--c:${col(p)}" data-id="${p.id}">${img(p)}<span>${p.name}</span><small>${PZ_RARITY[p.rarity].name} · ${p.value}</small></div>`;
+const card=(p,extra='')=>`<div class="pz-it ${extra}" style="--c:${col(p)}" data-id="${p.id}">${img(p)}<span>${p.name}</span><small>${PZ_RARITY[p.rarity].name} · ${p.rarity==='secret'?'???':p.value}</small></div>`;
 function popup(p,title,extra=''){const c=$('#pz-card');c.style.setProperty('--c',col(p));
  c.innerHTML=`<div class="pz-rar">${title}</div>${img(p)}<h3>${p.name}</h3><div class="pz-rar" style="margin-bottom:8px">${PZ_RARITY[p.rarity].name} · ${p.value} очк.</div><p>${p.description}</p>${extra}<button class="pz-btn" id="pz-okb">Круто!</button>`;
  $('#pz-res').classList.add('open');$('#pz-okb').onclick=()=>$('#pz-res').classList.remove('open')}
 const ease=t=>1-Math.pow(1-t,4);
+/* ---------- СЕКРЕТНАЯ ПИЦЦА ---------- */
+const SECRET_NOTE='<p style="color:#ff3d81;font-weight:700;margin:-6px 0 14px">⏳ Откроется через 1 час. Загляни в инвентарь!</p>';
+const fmt=ms=>{const s=Math.ceil(ms/1000),h=s/3600|0,m=(s%3600)/60|0;return (h?h+':':'')+String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const randomReal=()=>{const l=PIZZA_DATABASE.filter(p=>p.rarity!=='secret');return l[Math.random()*l.length|0]};
+// новый предмет инвентаря; у секретной пиццы заранее выбрано, что внутри, и время открытия
+const newItem=p=>p.id==='secret'?{uid:uid(),id:p.id,readyAt:Date.now()+SECRET_WAIT_MS,reveal:randomReal().id}:{uid:uid(),id:p.id};
+const secretCard=x=>{const p=byId('secret'),r=Date.now()>=x.readyAt;return `<div class="pz-it pz-sec ${r?'ready':''}" style="--c:${col(p)}" data-su="${x.uid}" data-at="${x.readyAt}">${img(p)}<span>${p.name}</span><small>${r?'Нажми, чтобы открыть!':'⏳ '+fmt(x.readyAt-Date.now())}</small></div>`};
+function revealSecret(u,el){
+ const x=inv.find(i=>i.uid===u); if(!x||busy)return;
+ if(Date.now()<x.readyAt){if(el){el.classList.add('pz-shake');setTimeout(()=>el.classList.remove('pz-shake'),500)}return}
+ let p=byId(x.reveal); if(!p||p.rarity==='secret')p=randomReal();
+ inv=inv.map(i=>i.uid===u?{uid:u,id:p.id}:i);save();renderAll();winSnd();popup(p,'Секрет раскрыт!');
+}
+function tickSecrets(){
+ if(!$('#pz-ov').classList.contains('open'))return;
+ $$('#pz-inv .pz-sec').forEach(e=>{const left=+e.dataset.at-Date.now(),sm=e.querySelector('small');
+  if(left<=0){if(!e.classList.contains('ready')){e.classList.add('ready');sm.textContent='Нажми, чтобы открыть!'}}
+  else sm.textContent='⏳ '+fmt(left)});
+}
 /* ---------- РУЛЕТКА ---------- */
 const CW=138; let strip=$('#pz-strip');
-function wpick(){let r=Math.random()*100,a=0;for(const k of ['common','rare','ultra']){a+=PZ_RARITY[k].weight;if(r<a){const l=PIZZA_DATABASE.filter(p=>p.rarity===k);return l[Math.random()*l.length|0]}}return PIZZA_DATABASE[0]}
+function wpick(){let r=Math.random()*100,a=0;for(const k of ['common','rare','ultra','secret']){a+=PZ_RARITY[k].weight;if(r<a){const l=PIZZA_DATABASE.filter(p=>p.rarity===k);return l[Math.random()*l.length|0]}}return PIZZA_DATABASE[0]}
 const ultras=PIZZA_DATABASE.filter(p=>p.rarity==='ultra');
 function initStrip(){ if(strip.children.length)return; const l=[];for(let i=0;i<14;i++)l.push(wpick());strip.innerHTML=l.map(p=>card(p)).join('');strip.style.transform='translateX(0)'}
 function open(){ if(busy)return; busy=true;$('#pz-go').disabled=true;
@@ -687,7 +716,7 @@ function open(){ if(busy)return; busy=true;$('#pz-go').disabled=true;
  const end=-(WI*step+cw/2-vw/2+jit), dur=7000, t0=performance.now(); let last=0; strip.style.transform='translateX(0)';
  (function f(now){const t=Math.min((now-t0)/dur,1),x=end*ease(t);strip.style.transform=`translateX(${x}px)`;
   const k=Math.floor(-x/step); if(k!==last){last=k;tick()}
-  if(t<1)requestAnimationFrame(f);else{inv.push({uid:uid(),id:win.id});save();renderAll();winSnd();popup(win,'Тебе выпала');busy=false;$('#pz-go').disabled=false}})(t0);
+  if(t<1)requestAnimationFrame(f);else{inv.push(newItem(win));save();renderAll();winSnd();popup(win,'Тебе выпала',win.id==='secret'?SECRET_NOTE:'');busy=false;$('#pz-go').disabled=false}})(t0);
 }
 $('#pz-go').onclick=open;
 /* ---------- АПГРЕЙДЕР ---------- */
@@ -706,7 +735,8 @@ function renderSlots(){
  $('#pz-spin').disabled=!ok||busy;
 }
 function renderLists(){
- $('#pz-mine').innerHTML=inv.length?inv.slice().sort((a,b)=>byId(b.id).value-byId(a.id).value).map(x=>card(byId(x.id),A&&A.uid===x.uid?'sel':'').replace('data-id="','data-u="'+x.uid+'" data-id="')).join(''):'<div class="pz-empty">Пусто. Открой кейс!</div>';
+ const mineInv=inv.filter(x=>x.id!=='secret');   // секретные пиццы в апгрейде не участвуют, пока закрыты
+ $('#pz-mine').innerHTML=mineInv.length?mineInv.slice().sort((a,b)=>byId(b.id).value-byId(a.id).value).map(x=>card(byId(x.id),A&&A.uid===x.uid?'sel':'').replace('data-id="','data-u="'+x.uid+'" data-id="')).join(''):'<div class="pz-empty">Пусто. Открой кейс!</div>';
  const base=A?byId(A.id).value:0;
  const l=PIZZA_DATABASE.filter(p=>p.value>base&&(rf==='all'||p.rarity===rf)).sort((a,b)=>a.value-b.value);
  $('#pz-tgt').innerHTML=l.length?l.map(p=>card(p,B&&B.id===p.id?'sel':'')).join(''):'<div class="pz-empty">Нет более крутых пицц</div>';
@@ -715,7 +745,8 @@ function renderLists(){
 }
 function renderAll(){
  $('#pz-cnt').textContent=inv.length;
- $('#pz-inv').innerHTML=inv.length?inv.slice().reverse().map(x=>card(byId(x.id))).join(''):'<div class="pz-empty">Пока пусто — открой первый кейс</div>';
+ $('#pz-inv').innerHTML=inv.length?inv.slice().reverse().map(x=>x.id==='secret'?secretCard(x):card(byId(x.id))).join(''):'<div class="pz-empty">Пока пусто — открой первый кейс</div>';
+ $$('#pz-inv .pz-sec').forEach(e=>e.onclick=()=>revealSecret(e.dataset.su,e));
  if(A&&!inv.find(x=>x.uid===A.uid))A=null; renderSlots();renderLists();
 }
 $$('.pz-fl .pz-chip').forEach(b=>b.onclick=()=>{rf=b.dataset.r;$$('.pz-fl .pz-chip').forEach(x=>x.classList.toggle('on',x===b));renderLists()});
@@ -739,6 +770,7 @@ function finish(win,a){
    $('#pz-res').classList.add('open');$('#pz-okb').onclick=()=>$('#pz-res').classList.remove('open')},700)}
 }
 renderAll();
+setInterval(tickSecrets,1000);
 })();
 </script>
 <!-- ===================== /PZ ===================== -->
